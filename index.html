@@ -3,102 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatbot by hans</title>
+    <title>Chatbot con OpenRouter</title>
     <style>
-        /* Estilos generales */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        #chat-container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 90%;
+            font-family: Arial, sans-serif;
             max-width: 800px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 85vh;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
         }
 
-        /* Contenedor de mensajes */
-        #chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
+        #chat-container {
+            background-color: white;
+            border-radius: 10px;
             padding: 20px;
-            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+
+        #chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
         .message {
             margin-bottom: 15px;
-            padding: 12px 16px;
-            border-radius: 20px;
+            padding: 8px 12px;
+            border-radius: 15px;
             max-width: 80%;
-            line-height: 1.5;
-            word-wrap: break-word;
         }
+
         .user-message {
             background-color: #e3f2fd;
-            color: #0d47a1;
             margin-left: auto;
         }
+
         .bot-message {
             background-color: #f5f5f5;
-            color: #333;
             margin-right: auto;
         }
 
-        /* Contenedor de entrada */
         #input-container {
             display: flex;
             gap: 10px;
-            padding: 10px;
-            background-color: #f9f9f9;
-            border-top: 1px solid #ddd;
         }
+
         #user-input {
             flex-grow: 1;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ddd;
-            border-radius: 25px;
-            outline: none;
-            transition: border-color 0.3s ease;
+            border-radius: 5px;
         }
-        #user-input:focus {
-            border-color: #007bff;
-        }
+
         button {
-            padding: 12px 20px;
+            padding: 10px 20px;
             background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
         }
 
-        /* Mejoras para dispositivos móviles */
-        @media (max-width: 600px) {
-            #chat-container {
-                height: 100vh;
-                border-radius: 0;
-            }
-            #input-container {
-                padding: 10px;
-            }
-            button {
-                padding: 10px 15px;
-            }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -106,7 +76,7 @@
     <div id="chat-container">
         <div id="chat-messages"></div>
         <div id="input-container">
-            <input type="text" id="user-input" placeholder="Escribe tu mensaje..." />
+            <input type="text" id="user-input" placeholder="Escribe tu mensaje...">
             <button onclick="sendMessage()">Enviar</button>
         </div>
     </div>
@@ -116,7 +86,6 @@
         const chatMessages = document.getElementById('chat-messages');
         const userInput = document.getElementById('user-input');
 
-        // Función para agregar mensajes al chat
         function addMessage(role, content) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', `${role}-message`);
@@ -125,17 +94,14 @@
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // Función para enviar mensajes al bot
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message) return;
 
-            // Agregar mensaje del usuario
             addMessage('user', message);
             userInput.value = '';
 
             try {
-                // Enviar solicitud al servidor
                 const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -146,22 +112,24 @@
                     },
                     body: JSON.stringify({
                         model: "cognitivecomputations/dolphin3.0-mistral-24b:free",
-                        messages: [{ role: "user", content: message }]
+                        messages: [{
+                            role: "user",
+                            content: message
+                        }]
                     })
                 });
 
                 const data = await response.json();
                 const botResponse = data.choices[0].message.content;
-
-                // Agregar respuesta del bot
                 addMessage('bot', botResponse);
+
             } catch (error) {
                 console.error('Error:', error);
                 addMessage('bot', 'Lo siento, hubo un error al procesar tu solicitud.');
             }
         }
 
-        // Manejar el envío con la tecla Enter
+        // Manejar Enter key
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 sendMessage();
